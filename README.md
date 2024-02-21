@@ -4,9 +4,13 @@ Version 0.1.0
 CircuitPython library for Azoteq IQS5XX trackpad modules, the TPS43 and TPS65 (see datasheet below)
 
 ## Basic Usage
+### Software
 1. copy `iqs5xx/iqs5xx.py` to the `lib` dir on your `CIRCUITPY` drive (or use the precompiled `iqs5xx.mpy` instead if you're tight on space!)
 3. copy `main.py` from `examples/main.py` to the root of your `CIRCUITPY` drive
 4. view output via the CircuitPython REPL / serial monitor
+### Hardware
+1. connect the `GND`, `3V3`, `SDA` and `SCL` pins from the trackpad module to the microcontroller via a [STEMMA QT to male header cable](https://www.adafruit.com/product/4209) or similar
+2. connect the `RDY` pin from the trackpad module to an interrupt-capable pin on the microcontroller - On the QTPy RP2040 this is any pin in PWM group "B"; `MOSI` is used in the example `main.py` file
 
 This library has been tested on:
 - [CircutPython 8.2.9](https://circuitpython.org/board/adafruit_qtpy_rp2040/)
