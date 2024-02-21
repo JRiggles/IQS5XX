@@ -24,4 +24,4 @@ It *should* work on other CircuitPython-compatible hardware, but YMMV - this lib
 
 [Azoteq IQS5XX "ProxSense&reg;" series datasheet](https://www.azoteq.com/images/stories/pdf/iqs5xx-b000_trackpad_datasheet.pdf)
 
-[^1]: All trademarks and copyrights belong to their respective owners
+[^1]: All trademarks are property of their respective owners
