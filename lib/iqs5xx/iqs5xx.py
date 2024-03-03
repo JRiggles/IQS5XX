@@ -367,7 +367,7 @@ class IQS5XX:
             try:
                 device = I2CDevice(self.i2c, DEVICE_ADDR)
             except ValueError:
-                sleep(0.002)  # wait 200uS just to be safe
+                sleep(0.001)  # wait 1mS just to be safe
             else:
                 # disable 'suspend' bit (bit 0 of system_control_1 register)
                 register = self._addr_to_bytes(0x0432)
