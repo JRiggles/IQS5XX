@@ -5,7 +5,7 @@ CircuitPython library for Azoteq IQS5XX trackpad modules, the TPS43 and TPS65 (s
 
 ## Basic Usage
 ### Software
-1. copy `iqs5xx/iqs5xx.py` to the `lib` dir on your `CIRCUITPY` drive (or use the precompiled `iqs5xx.mpy` instead if you're tight on space!)
+1. copy `lib/iqs5xx.py` to the `lib` dir on your `CIRCUITPY` drive (or use the precompiled `iqs5xx.mpy` instead if you're tight on space!)
 3. copy `main.py` from `examples/main.py` to the root of your `CIRCUITPY` drive
 4. view output via the CircuitPython REPL / serial monitor
 ### Hardware
