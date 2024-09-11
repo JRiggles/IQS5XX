@@ -1,5 +1,5 @@
 # IQS5XX
-Version 0.1.0
+Version 0.1.1
 
 CircuitPython library for Azoteq IQS5XX trackpad modules, the TPS43 and TPS65 (see datasheet below)
 
