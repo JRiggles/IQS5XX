@@ -25,6 +25,7 @@ Circuitpython module for interfacing with Azoteq trackpad modules
 
 Datasheet: https://www.azoteq.com/images/stories/pdf/iqs5xx-b000_trackpad_datasheet.pdf
 """
+from typing import Any
 import board
 import busio
 from adafruit_bus_device.i2c_device import I2CDevice
@@ -109,7 +110,7 @@ REGISTERS: dict[str, tuple[int, int]] = {
     'alp_count_value': (const(0x02ED), const(2)),
     'alp_individual_count_values': (const(0x02EF), const(20)),
 
-    # ---- advanced features - writable registers ---
+    # --- advanced features - writable registers ---
     'reference_values': (const(0x0303), const(300)),
     'alp_lta': (const(0x42F), const(2)),
     'system_control_0': (const(0x0431), const(1)),
@@ -227,7 +228,7 @@ class IQS5XX:
     """
     # use __slots__ to add register names as class attributes
     # NOTE: splat syntax (*REGISTERS) is not supported, so list() is used here
-    __slots__ = ('__dict__', list(REGISTERS.keys()))
+    __slots__ = ('__dict__', list(REGISTERS))
 
     def __init__(
         self,
@@ -248,8 +249,8 @@ class IQS5XX:
         self.ready_pin = ready_pin
         self.scl = scl
         self.sda = sda
-        self.i2c = busio.I2C(self.scl, self.sda, frequency=I2C_FREQ)
-        self.device = self._connect_device()
+        self._i2c = busio.I2C(self.scl, self.sda, frequency=I2C_FREQ)
+        self._device = self._connect_device()
 
         # check if the connected device is really a ProxSense IQS5XX IC
         if self.product_no not in PRODUCT_NOS:
@@ -257,7 +258,7 @@ class IQS5XX:
                 'This device is not recognized as an IQS5XX device'
             )
 
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str) -> int | Any:
         """
         Override to get the value of a register or class attribute
 
@@ -269,7 +270,7 @@ class IQS5XX:
 
         :raises AttributeError: IQS5XX has no attribute "<name>"
         """
-        if name in REGISTERS.keys():  # get register value
+        if name in REGISTERS:  # get register value
             return self._get(name)
         elif name in self.__dict__:  # get class attribute value
             return self.__dict__[name]
@@ -289,7 +290,7 @@ class IQS5XX:
 
         :raises AttributeError: IQS5XX has no attribute "<name>"
         """
-        if name in REGISTERS.keys():  # set register value
+        if name in REGISTERS:  # set register value
             self._set(name, value)
         elif name in self.__dict__:  # otherwise use standard __setattr__
             super().__setattr__(name, value)
@@ -313,10 +314,14 @@ class IQS5XX:
         """
         try:
             # convert 16-bit address into byte-sized chunks
-            register = self._addr_to_bytes(register)
+            b_register = self._addr_to_bytes(register)
             buffer = bytearray(n_bytes)
-            with self.device:
-                self.i2c.writeto_then_readfrom(DEVICE_ADDR, register, buffer)
+            with self._device:  # type: ignore
+                self._i2c.writeto_then_readfrom(
+                    DEVICE_ADDR,
+                    b_register,
+                    buffer
+                )
         except OSError:  # FIXME: set up interrupt from IQS READY pin
             return bytearray()
         else:
@@ -335,9 +340,9 @@ class IQS5XX:
 
         :raises OSError: If an error occurs during the write operation.
         """
-        register = self._addr_to_bytes(register)
-        with self.device:
-            self.i2c.writeto(DEVICE_ADDR, register + bytes([value]))
+        b_register = self._addr_to_bytes(register)
+        with self._device:  # type: ignore
+            self._i2c.writeto(DEVICE_ADDR, b_register + bytes([value]))
 
     def _connect_device(self, timeout: float = 2.0) -> I2CDevice | None:
         """
@@ -365,7 +370,7 @@ class IQS5XX:
         CONNECT_START = monotonic()
         while monotonic() < CONNECT_START + timeout:
             try:
-                device = I2CDevice(self.i2c, DEVICE_ADDR)
+                device = I2CDevice(self._i2c, DEVICE_ADDR)
             except ValueError:
                 sleep(0.001)  # wait 1mS just to be safe
             else:
@@ -373,7 +378,7 @@ class IQS5XX:
                 register = self._addr_to_bytes(0x0432)
                 with device:
                     self.wait_ready()
-                    self.i2c.writeto(DEVICE_ADDR, register)
+                    self._i2c.writeto(DEVICE_ADDR, register)
                 return device
         else:
             raise TimeoutError('Could not connect to IQS5XX device')
@@ -450,9 +455,9 @@ class IQS5XX:
         """
         register = self._addr_to_bytes(0xEEEE)
         try:
-            with self.device:
+            with self._device:  # type: ignore
                 self.wait_ready()
-                self.i2c.writeto(DEVICE_ADDR, register + bytes([0]))
+                self._i2c.writeto(DEVICE_ADDR, register + bytes([0]))
                 sleep(0.01)
         except OSError:
             return
